@@ -2,147 +2,189 @@ import socket
 import os
 import argparse
 import logging
+import base64
+import json
 import sys
-from concurrent.futures import ProcessPoolExecutor
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import Process
 
-# Server configuration
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Multiprocessing file server using ProcessPoolExecutor"
-    )
-    parser.add_argument(
-        '--host', default='0.0.0.0',
-        help='Host IP to bind the server (default: 0.0.0.0)'
-    )
-    parser.add_argument(
-        '--port', type=int, default=8889,
-        help='TCP port to listen on (default: 8889)'
-    )
-    parser.add_argument(
-        '--workers', type=int, default=4,
-        help='Number of worker processes in pool (default: 4)'
-    )
-    parser.add_argument(
-        '--storage', default='Temp',
-        help='Directory to store uploaded files (default: Temp)'
-    )
-    parser.add_argument(
-        '--log', default='server.log',
-        help='Log file path (default: server.log)'
-    )
-    return parser.parse_args()
-
+# Nilai default, bisa diubah via argparse
+HOST = '0.0.0.0'
+PORT = 55555
+BUFFER_SIZE = 1048576
+STORAGE_DIR = 'storage'
+LOG_FILE = 'server.log'
 
 def setup_logging(log_file):
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(processName)s - %(message)s',
+        level=logging.DEBUG,
+        format='%(asctime)s - %(levelname)s - %(threadName)s - %(message)s',
         handlers=[
             logging.FileHandler(log_file),
             logging.StreamHandler(sys.stdout)
         ]
     )
 
+def server_worker_process(host, port, storage_dir):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        except AttributeError:
+            logging.warning("SO_REUSEPORT is not supported on this platform.")
 
-def recv_until(sock, delimiter=b"\r\n\r\n", bufsize=1024):
-    data = b""
-    while delimiter not in data:
-        chunk = sock.recv(bufsize)
-        if not chunk:
-            break
-        data += chunk
-    return data
+        server_socket.bind((host, port))
+        server_socket.listen(100)
+        logging.info(f"[PID {os.getpid()}] Listening on {host}:{port}")
 
+        while True:
+            try:
+                conn, addr = server_socket.accept()
+                logging.info(f"[PID {os.getpid()}] Accepted connection from {addr}")
+                handle_client(conn, addr, storage_dir)
+            except Exception as e:
+                logging.error(f"[PID {os.getpid()}] Error accepting connection: {e}")
 
-def handle_client_fd(fd, addr, storage_dir):
-    # Reconstruct socket from FD in worker process
-    conn = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM, fileno=fd)
+def handle_client(conn, addr, storage_dir):
+    thread_name = threading.current_thread().name
     try:
         logging.info(f"Connection from {addr}")
-        data = recv_until(conn)
-        if not data:
-            return
-        header, rest = data.split(b"\r\n\r\n", 1)
-        parts = header.decode(errors='ignore').strip().split()
+
+        data_received = ""
+        while True:
+            data = conn.recv(BUFFER_SIZE).decode()
+            if not data:
+                break
+            data_received += data
+            if "\r\n\r\n" in data_received:
+                break
+        logging.debug(f"Received data (truncated): {data_received[:100]}")
+
+        parts = data_received.strip().split()
         if len(parts) < 2:
-            conn.sendall(b"ERROR Invalid command format\r\n\r\n")
+            resp = json.dumps({"status": "ERROR", "data": "Invalid command format"}) + "\r\n\r\n"
+            conn.sendall(resp.encode())
             return
 
         command = parts[0].upper()
-        filename = os.path.basename(parts[1])
+        filename = parts[1]
         filepath = os.path.join(storage_dir, filename)
 
         if command == "UPLOAD":
-            if len(parts) < 3 or not parts[2].isdigit():
-                conn.sendall(b"ERROR No size provided\r\n\r\n")
+            if len(parts) < 3:
+                resp = json.dumps({"status": "ERROR", "data": "No data to upload"}) + "\r\n\r\n"
+                conn.sendall(resp.encode())
                 return
-            size = int(parts[2])
-            conn.sendall(b"OK Ready to receive\r\n\r\n")
-            received = len(rest)
-            with open(filepath, 'wb') as f:
-                if rest:
-                    f.write(rest)
-                while received < size:
-                    chunk = conn.recv(min(65536, size - received))
-                    if not chunk:
-                        break
-                    f.write(chunk)
-                    received += len(chunk)
-            logging.info(f"Saved file {filename} ({received} bytes)")
-            conn.sendall(b"OK Upload complete\r\n\r\n")
+            encoded_data = " ".join(parts[2:])
+            try:
+                file_data = base64.b64decode(encoded_data)
+                with open(filepath, 'wb') as f:
+                    f.write(file_data)
+                logging.info(f"Saved file {filename} from {addr}")
+                resp = json.dumps({"status": "OK", "data": f"Uploaded {filename}"}) + "\r\n\r\n"
+                conn.sendall(resp.encode())
+            except Exception as e:
+                logging.error(f"Error decoding/saving file {filename}: {e}")
+                resp = json.dumps({"status": "ERROR", "data": str(e)}) + "\r\n\r\n"
+                conn.sendall(resp.encode())
 
         elif command == "GET":
             if not os.path.exists(filepath):
-                conn.sendall(b"ERROR File not found\r\n\r\n")
+                resp = json.dumps({"status": "ERROR", "data": "File not found"}) + "\r\n\r\n"
+                conn.sendall(resp.encode())
                 return
-            size = os.path.getsize(filepath)
-            conn.sendall(f"OK {size}\r\n\r\n".encode())
             with open(filepath, 'rb') as f:
-                while True:
-                    chunk = f.read(65536)
-                    if not chunk:
-                        break
-                    conn.sendall(chunk)
-            logging.info(f"Sent file {filename} ({size} bytes)")
+                file_data = f.read()
+            encoded_data = base64.b64encode(file_data).decode()
+            resp = json.dumps({
+                "status": "OK",
+                "data_namafile": filename,
+                "data_file": encoded_data
+            }) + "\r\n\r\n"
+            conn.sendall(resp.encode())
+            logging.info(f"Sent file {filename} to {addr}")
 
         else:
-            conn.sendall(b"ERROR Invalid command\r\n\r\n")
+            resp = json.dumps({"status": "ERROR", "data": "Invalid command"}) + "\r\n\r\n"
+            conn.sendall(resp.encode())
 
     except Exception as e:
-        logging.exception(f"Error handling {addr}: {e}")
+        logging.error(f"Exception handling client {addr}: {e}")
+        resp = json.dumps({"status": "ERROR", "data": str(e)}) + "\r\n\r\n"
+        try:
+            conn.sendall(resp.encode())
+        except:
+            pass
     finally:
         conn.close()
         logging.info(f"Closed connection from {addr}")
 
-
-def start_server(host, port, workers, storage_dir):
-    os.makedirs(storage_dir, exist_ok=True)
-    # Create listening socket
+def start_server_single(host, port, storage_dir):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind((host, port))
         server_socket.listen(100)
-        logging.info(f"Server listening on {host}:{port} with {workers} worker processes")
+        logging.info(f"Single-threaded server started on {host}:{port}")
 
-        # Use ProcessPoolExecutor; children inherit the listening socket FD
-        with ProcessPoolExecutor(max_workers=workers) as executor:
-            try:
-                while True:
-                    conn, addr = server_socket.accept()
-                    # Pass connection FD and address to worker, then close in parent
-                    fd = conn.fileno()
-                    executor.submit(handle_client_fd, fd, addr, storage_dir)
-                    conn.close()
-                    logging.info(f"Dispatched connection from {addr} to worker")
-            except KeyboardInterrupt:
-                logging.info("Server shutdown requested, exiting...")
+        while True:
+            conn, addr = server_socket.accept()
+            logging.info(f"Accepted connection from {addr}")
+            handle_client(conn, addr, storage_dir)
 
+def start_server_threaded(host, port, workers, storage_dir):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server_socket.bind((host, port))
+        server_socket.listen(100)
+        logging.info(f"Thread-pool server started on {host}:{port} with {workers} workers")
+
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            while True:
+                conn, addr = server_socket.accept()
+                logging.info(f"Accepted connection from {addr}")
+                executor.submit(handle_client, conn, addr, storage_dir)
+
+def start_server_process(host, port, workers, storage_dir):
+    logging.info(f"Starting multiprocessing server with {workers} workers")
+    processes = []
+    for _ in range(workers):
+        p = Process(target=server_worker_process, args=(host, port, storage_dir))
+        p.start()
+        processes.append(p)
+
+    for p in processes:
+        p.join()
 
 def main():
-    args = parse_args()
-    setup_logging(args.log)
-    start_server(args.host, args.port, args.workers, args.storage)
+    global HOST, PORT, STORAGE_DIR, LOG_FILE
 
+    parser = argparse.ArgumentParser(description="File server with multiple concurrency modes.")
+    parser.add_argument('--mode', choices=['single', 'thread', 'process'], default='single', help="Mode to run the server")
+    parser.add_argument('--host', default='0.0.0.0', help="Host to bind the server")
+    parser.add_argument('--port', type=int, default=55555, help="Port to bind the server")
+    parser.add_argument('--workers', type=int, default=1, help="Number of worker threads or processes")
+    parser.add_argument('--storage', default='storage', help="Directory to store files")
+    parser.add_argument('--log', default='server.log', help="Path to the log file")
+    args = parser.parse_args()
+
+    # Set global vars
+    HOST = args.host
+    PORT = args.port
+    STORAGE_DIR = args.storage
+    LOG_FILE = args.log
+
+    os.makedirs(STORAGE_DIR, exist_ok=True)
+    setup_logging(LOG_FILE)
+
+    if args.mode == 'single':
+        start_server_single(HOST, PORT, STORAGE_DIR)
+    elif args.mode == 'thread':
+        start_server_threaded(HOST, PORT, args.workers, STORAGE_DIR)
+    elif args.mode == 'process':
+        start_server_process(HOST, PORT, args.workers, STORAGE_DIR)
+    else:
+        logging.error("Invalid mode selected.")
 
 if __name__ == '__main__':
     main()
