@@ -1,0 +1,52 @@
+Nomor,Operasi,Volume,Jumlah client worker pool,Jumlah server worker pool,Waktu total per client,Throughput per client,Jumlah worker client yang sukses dan gagal,Jumlah worker server yang sukses dan gagal
+1,thread,13.33MB,1,1,0.627s,21772.08 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,thread,13.33MB,5,1,1.585s,8612.26 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,thread,13.33MB,50,1,13.843s,986.3 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,thread,66.67MB,1,1,3.064s,22282.78 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,thread,66.67MB,5,1,7.700s,8866.21 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,thread,66.67MB,50,1,68.083s,1223.92 KB/s,"27 sukses, 23 gagal",Periksa Log Server
+1,thread,133.33MB,1,1,5.788s,23588.4 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,thread,133.33MB,5,1,15.376s,8879.78 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+1,thread,13.33MB,1,5,0.524s,26079.65 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,thread,13.33MB,5,5,0.978s,13957.46 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,thread,13.33MB,50,5,6.228s,2192.22 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,thread,66.67MB,1,5,2.787s,24490.49 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,thread,66.67MB,5,5,4.708s,14501.66 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,thread,66.67MB,50,5,33.712s,2025.02 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,thread,133.33MB,1,5,6.269s,21780.56 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,thread,133.33MB,5,5,9.752s,14001.05 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+1,thread,13.33MB,1,50,0.525s,26007.63 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,thread,13.33MB,5,50,0.952s,14341.23 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,thread,13.33MB,50,50,8.047s,1696.76 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,thread,66.67MB,1,50,2.627s,25989.77 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,thread,66.67MB,5,50,4.884s,13978.3 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,thread,66.67MB,50,50,44.574s,1531.52 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,thread,133.33MB,1,50,5.785s,23601.03 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,thread,133.33MB,5,50,9.798s,13934.37 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+1,thread,10MB,1,1,0.351,38907.32,1,0,
+2,thread,10MB,5,1,0.968,14100.63,5,0,
+3,thread,10MB,50,1,7.961,1714.94,50,0,
+1,thread,50MB,1,1,1.913,35679.36,1,0,
+2,thread,50MB,5,1,5.156,13240.97,5,0,
+3,thread,50MB,50,1,39.238,2138.10,37,13,Socket timeout saat operasi download.
+1,thread,100MB,1,1,0.011,0.00,1,0,
+2,thread,100MB,5,1,0.022,0.00,5,0,
+3,thread,100MB,50,1,0.162,0.00,50,0,
+1,thread,10MB,1,5,0.350,39062.84,1,0,
+2,thread,10MB,5,5,0.730,18713.74,5,0,
+3,thread,10MB,50,5,4.078,3348.07,50,0,
+1,thread,50MB,1,5,1.810,37715.20,1,0,
+2,thread,50MB,5,5,3.647,18718.24,5,0,
+3,thread,50MB,50,5,20.038,3406.82,50,0,
+1,thread,100MB,1,5,0.014,0.00,1,0,
+2,thread,100MB,5,5,0.015,0.00,5,0,
+3,thread,100MB,50,5,0.048,0.00,50,0,
+1,thread,10MB,1,50,0.370,36931.05,1,0,
+2,thread,10MB,5,50,0.715,19091.03,5,0,
+3,thread,10MB,50,50,7.149,1909.84,50,0,
+1,thread,50MB,1,50,1.775,38470.14,1,0,
+2,thread,50MB,5,50,3.608,18923.15,5,0,
+3,thread,50MB,50,50,35.648,1915.00,50,0,
+1,thread,100MB,1,50,0.019,0.00,1,0,
+2,thread,100MB,5,50,0.018,0.00,5,0,
+3,thread,100MB,50,50,0.070,0.00,50,0,

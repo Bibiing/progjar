@@ -1,0 +1,52 @@
+Nomor,Operasi,Volume,Jumlah client worker pool,Jumlah server worker pool,Waktu total per client,Throughput per client,Jumlah worker client yang sukses dan gagal,Jumlah worker server yang sukses dan gagal
+1,process,13.33MB,1,1,0.556s,24542.36 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,process,13.33MB,5,1,1.476s,9248.78 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,process,13.33MB,50,1,12.777s,1068.57 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,process,66.67MB,1,1,2.800s,24384.97 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,process,66.67MB,5,1,7.194s,9489.25 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,process,66.67MB,50,1,53.649s,1676.12 KB/s,"27 sukses, 23 gagal",Periksa Log Server
+1,process,133.33MB,1,1,6.156s,22179.55 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,process,133.33MB,5,1,14.522s,9402.15 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,process,133.33MB,50,1,300.000s,0.0 KB/s,"0 sukses, 50 gagal",Periksa Log Server
+1,process,13.33MB,1,5,0.560s,24377.93 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,process,13.33MB,5,5,0.867s,15745.29 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,process,13.33MB,50,5,5.171s,2640.58 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,process,66.67MB,1,5,2.879s,23710.38 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,process,66.67MB,5,5,4.181s,16326.79 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,process,66.67MB,50,5,26.713s,2555.55 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,process,133.33MB,1,5,5.743s,23774.11 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,process,133.33MB,5,5,8.692s,15708.3 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,process,133.33MB,50,5,300.000s,0.0 KB/s,"0 sukses, 50 gagal",Periksa Log Server
+1,process,13.33MB,1,50,0.619s,22074.56 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,process,13.33MB,5,50,0.848s,16094.01 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,process,13.33MB,50,50,6.071s,2248.87 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,process,66.67MB,1,50,2.744s,24874.71 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,process,66.67MB,5,50,4.225s,16158.5 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,process,66.67MB,50,50,32.666s,2089.86 KB/s,"50 sukses, 0 gagal",Periksa Log Server
+1,process,133.33MB,1,50,5.464s,24988.21 KB/s,"1 sukses, 0 gagal",Periksa Log Server
+2,process,133.33MB,5,50,8.677s,15735.93 KB/s,"5 sukses, 0 gagal",Periksa Log Server
+3,process,133.33MB,50,50,300.000s,0.0 KB/s,"0 sukses, 50 gagal",Periksa Log Server
+1,process,10MB,1,1,0.358,38088.11,1,0,
+2,process,10MB,5,1,1.022,13355.12,5,0,
+3,process,10MB,50,1,8.304,1644.17,50,0,
+1,process,50MB,1,1,1.711,39908.09,1,0,
+2,process,50MB,5,1,5.177,13185.40,5,0,
+3,process,50MB,50,1,38.311,2172.35,38,12,
+1,process,100MB,1,1,0.028,6976.28,1,0,
+2,process,100MB,5,1,0.094,2046.16,5,0,
+3,process,100MB,50,1,1.031,186.28,50,0,
+1,process,10MB,1,5,0.359,38050.41,1,0,
+2,process,10MB,5,5,0.699,19533.89,5,0,
+3,process,10MB,50,5,4.183,3264.28,50,0,
+1,process,50MB,1,5,1.665,40990.34,1,0,
+2,process,50MB,5,5,3.423,19944.26,5,0,
+3,process,50MB,50,5,20.197,3380.12,50,0,
+1,process,100MB,1,5,0.031,6140.58,1,0,
+2,process,100MB,5,5,0.044,4379.31,5,0,
+3,process,100MB,50,5,0.254,755.57,50,0,
+1,process,10MB,1,50,0.354,38575.26,1,0,
+2,process,10MB,5,50,0.668,20428.42,5,0,
+3,process,10MB,50,50,7.252,1882.66,50,0,
+1,process,50MB,1,50,1.671,40857.88,1,0,
+2,process,50MB,5,50,3.466,19693.68,5,0,
+3,process,50MB,50,50,35.441,1926.21,50,0,
